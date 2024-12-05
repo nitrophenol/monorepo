@@ -1,11 +1,26 @@
 {
+  "$schema": "https://turborepo.org/schema.json",
   "pipeline": {
     "build": {
-      "outputs": ["dist/**"]
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**", "out/**"]
     },
-    "lint": {},
     "dev": {
       "cache": false
+    },
+    "lint": {
+      "outputs": []
+    },
+    "test": {
+      "outputs": []
+    },
+    "docker": {
+      "dependsOn": ["build"],
+      "outputs": ["docker-image.tar"]
+    },
+    "deploy": {
+      "dependsOn": ["docker"],
+      "outputs": []
     }
   }
 }

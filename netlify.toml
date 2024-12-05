@@ -1,0 +1,17 @@
+[build]
+  publish = "apps/project1/out"
+  command = "npm run build"
+
+[[redirects]]
+  from = "/project1/*"
+  to = "/apps/project1/out/*"
+  status = 200
+
+[build]
+  publish = "apps/project2/out"
+  command = "npm run build"
+
+[[redirects]]
+  from = "/project2/*"
+  to = "/apps/project2/out/*"
+  status = 200

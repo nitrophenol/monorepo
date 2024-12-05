@@ -1,9 +1,12 @@
-name: Deploy to Netlify
+name: Deploy Monorepo to Netlify
 
 on:
   push:
     branches:
-      - main  # Trigger the workflow on pushes to the main branch
+      - main  # Trigger on pushes to the main branch
+  pull_request:
+    branches:
+      - main  # Trigger on pull requests to the main branch
 
 jobs:
   build-and-deploy:
@@ -14,22 +17,42 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v3
 
-      # Step 2: Set up Docker
-      - name: Set up Docker
-        uses: docker/setup-buildx-action@v2
+      # Step 2: Set up Node.js
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"  # Use Node.js version 18
+          cache: "npm"
 
-      # Step 3: Build the Docker image
-      - name: Build Docker image
+      # Step 3: Install dependencies
+      - name: Install dependencies
+        run: npm install
+
+      # Step 4: Run Turborepo build
+      - name: Build projects with Turborepo
+        run: npm run build
+
+      # Step 5: Build Docker images
+      - name: Build Docker images
         run: |
           docker build -t project1 ./apps/project1
           docker build -t project2 ./apps/project2
 
-      # Step 4: Deploy to Netlify
-      - name: Deploy to Netlify
+      # Step 6: Deploy to Netlify
+      - name: Deploy project1 to Netlify
         uses: netlify/actions/deploy@v2.0.0
         with:
-          publish-dir: ./apps/project1/out  # Path to the built project output
-          production: true                 # Deploy to the production site
+          publish-dir: ./apps/project1/out
+          production: true
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
           NETLIFY_SITE_ID: ${{ secrets.PROJECT1_SITE_ID }}
+
+      - name: Deploy project2 to Netlify
+        uses: netlify/actions/deploy@v2.0.0
+        with:
+          publish-dir: ./apps/project2/out
+          production: true
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.PROJECT2_SITE_ID }}
